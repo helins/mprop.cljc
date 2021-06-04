@@ -156,7 +156,8 @@
          x
          (fail beacon
                x)))
-     (catch Throwable e
+     (catch #?(:clj  Throwable
+               :cljs :default) e
        (fail beacon
              e))))
 

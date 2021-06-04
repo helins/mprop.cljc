@@ -89,7 +89,8 @@
                                                                               nil])]
                                                [(constantly x)
                                                 x])
-                                             (TC.gen/return (let [e (Error.)]
+                                             (TC.gen/return (let [e #?(:clj  (Error.)
+                                                                       :cljs (js/Error.))]
                                                             [#(throw e)
                                                              e]))
                                              (TC.gen/let [x TC.gen/any]
