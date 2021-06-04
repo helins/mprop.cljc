@@ -9,13 +9,17 @@
 
   {:author "Adam Helinski"}
 
-  (:require [clojure.test :as t]
-            [helins.mprop :as mprop]))
+  (:require [clojure.test.check.generators :as TC.gen]
+            [clojure.test.check.properties :as TC.prop]
+            [helins.mprop                  :as mprop]))
 
 
 ;;;;;;;;;;
 
 
-(t/deftest main
+(mprop/deftest deftest
 
-  (t/is (true? true)))
+  {:num-tests 1}
+
+  (TC.prop/for-all [_ (TC.gen/return nil)]
+    true))

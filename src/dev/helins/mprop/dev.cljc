@@ -11,7 +11,8 @@
 
   (:require [clojure.test.check.generators :as TC.gen]
             [clojure.test.check.properties :as TC.prop]
-            [helins.mprop                  :as mprop]))
+            [helins.mprop                  :as mprop]
+            [helins.mprop.test]))
 
 
 ;;;;;;;;;;

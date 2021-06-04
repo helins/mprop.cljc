@@ -11,8 +11,7 @@
 
   :dev
   {:extra-paths ["src/dev"
-                 "src/example"
-                 "src/test"]}
+                 "src/example"]}
 
   :jar
   {:exec-args    {:jar      "compiled/jvm/release.jar"
