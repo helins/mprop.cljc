@@ -14,7 +14,11 @@
             [clojure.test.check.clojure-test :as TC.ct]
             [clojure.test.check.results      :as TC.result])
   #?(:cljs (:require-macros [helins.mprop :refer [and
+                                                  check
                                                   deftest]])))
+
+
+(declare fail)
 
 
 ;;;;;;;;;; Defining tests
@@ -134,3 +138,55 @@
     (if (seq form+)
       (-and form+)
       true)))
+
+
+
+(defn ^:no-doc -check
+
+  ;;
+
+  [beacon f]
+
+  (try
+     (let [x (f)]
+       (if (TC.result/pass? x)
+         x
+         (fail beacon
+               x)))
+     (catch Throwable e
+       (fail beacon
+             e))))
+
+
+
+(defmacro check
+
+  ""
+
+  [beacon form]
+
+  `(-check ~beacon
+           (fn [] ~form)))
+
+
+
+(defn fail
+
+  ""
+
+  [beacon failure]
+
+  (let [result-upstream (TC.result/result-data failure)
+        path            (:mprop/path result-upstream)
+        result          {:mprop/path (cons beacon
+                                           path)
+                         :mprop/value (if path
+                                        (:mprop/value result-upstream)
+                                        failure)}]
+  (reify TC.result/Result
+
+    (pass? [_]
+      false)
+
+    (result-data [_]
+      result))))

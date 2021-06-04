@@ -17,7 +17,7 @@
             [helins.mprop                  :as mprop]))
 
 
-;;;;;;;;;;
+;;;;;;;;;; Helpers
 
 
 (defn =
@@ -30,7 +30,23 @@
          (map hash
               x+)))
 
-;;;;;;;;;;
+
+;;;;;;;;;; Generators
+
+
+(def gen-falsy
+     (TC.gen/elements #{nil
+                        false
+                        (reify TC.result/Result (pass? [_] false))}))
+
+
+
+(def gen-truthy
+     (TC.gen/frequency [[9 TC.gen/any
+                         1 (TC.gen/return (reify TC.result/Result (pass? [_] true)))]]))
+
+
+;;;;;;;;;; Tests
 
 
 #?(:clj (mprop/deftest and-
@@ -63,9 +79,65 @@
 
 
 
-(mprop/deftest deftest
+(mprop/deftest check--failure
 
-  {:num-tests 1}
+  (TC.prop/for-all [path     (TC.gen/vector TC.gen/any
+                                            1
+                                            8)
+                    [failure
+                     value]  (TC.gen/one-of [(TC.gen/let [x (TC.gen/elements [false
+                                                                              nil])]
+                                               [(constantly x)
+                                                x])
+                                             (TC.gen/return (let [e (Error.)]
+                                                            [#(throw e)
+                                                             e]))
+                                             (TC.gen/let [x TC.gen/any]
+                                               (let [x-2 (reify TC.result/Result
+        
+                                                           (pass? [_]
+                                                             false)
+        
+                                                           (result-data [_]
+                                                             x))]
+                                                 [(constantly x-2)
+                                                  x-2]))])]
+    (let [{path-2  :mprop/path
+           value-2 :mprop/value} (TC.result/result-data (let [f (fn f [[x & x+]]
+                                                          (if x+
+                                                            (let [upstream (f x+)]
+                                                              (fn []
+                                                                (mprop/check x
+                                                                             (upstream))))
+                                                            (fn []
+                                                              (mprop/check x
+                                                                           (failure)))))]
+                                                  ((f path))))]
+      (mprop/and (mprop/check "Path"
+                              (= path
+                                 path-2))
+                 (mprop/check "Value"
+                              (= value
+                                 value-2))))))
 
-  (TC.prop/for-all [_ (TC.gen/return nil)]
-    true))
+
+
+(mprop/deftest check--success
+
+  (TC.prop/for-all [path  (TC.gen/vector TC.gen/any
+                                         1
+                                         8)
+                    value (TC.gen/such-that boolean
+                                            TC.gen/any)]
+    (mprop/and (mprop/check "Output is input"
+                            (= value
+                               (let [f (fn f [[x & x+]]
+                                         (if x+
+                                           (let [upstream (f x+)]
+                                             (fn []
+                                               (mprop/check x
+                                                            (upstream))))
+                                           (fn []
+                                             (mprop/check x
+                                                          value))))]
+                                 ((f path))))))))
