@@ -5,7 +5,9 @@
 
 (ns helins.mprop
 
-  ""
+  "Multiplexing `test.check` property and tracking failure.
+  
+   See README for overview."
 
   {:author "Adam Helinski"}
 
@@ -38,22 +40,22 @@
   
   (def max-size
   
-    "Maximum size used by [[deftest]]. Can be set using the \"BREAK_MAX_SIZE\" env variable.
+    "Maximum size used by [[deftest]]. Can be set using the \"MPROP_MAX_SIZE\" env variable.
     
      Default value is 200."
   
-    (get-env "BREAK_MAX_SIZE"
+    (get-env "MPROP_MAX_SIZE"
              200))
   
   
   
   (def num-tests
   
-    "Number of tests used by [[deftest]]. Can be set using the \"BREAK_NUM_TESTS\" env variable.
+    "Number of tests used by [[deftest]]. Can be set using the \"MPROP_NUM_TESTS\" env variable.
     
      Default value is 100."
   
-    (get-env "BREAK_NUM_TESTS"
+    (get-env "MPROP_NUM_TESTS"
              100))))
   
   
@@ -64,25 +66,22 @@
   "Like `clojure.test.check.clojure-test/defspec`.
   
    Difference is that the number of tests and maximum size can be easily configured
-   at the level of the whole test suite.
+   and calibrated at the level of the whole test suite.
 
    `option+` is a map as accepted by `defspec`, it can notably hold `:max-size` and
    `:num-tests`.
   
    Most of the time, it is not productive fixing absolute values. During dev, number of tests
    and maximum size can be kept low in order to gain a fast feedback on what is going on.
-   During actual testing, those values can be set high for thorough testing.
+   During actual testing, those values can be set a lot higher.
 
-   For altering the base values, see [[max-size]] and [[num-tests]].
-
-   Comparing tests, some are cheap and could be run with much higher settings, others are
-   expensive and cannot have that luxury. Thus, it is important calibrating tests and it
-   can be done by providing in `option+`:
+   For altering the base values, see [[max-size]] and [[num-tests]]. Each test can be
+   calibrated against those base values. `option+` also accepts:
 
    | Key | Value |
    |---|---|
-   | `:ratio-num` | Multiplies the base `:num-tests` value |
-   | `:ratio-size` | Multiplies the base `:max-size` value |
+   | `:ratio-num` | Multiplies the base [[num-tests]] value |
+   | `:ratio-size` | Multiplies the base [[:max-size]] value |
 
    For instance, a test that runs 10 times more with half the maximum size:
 
@@ -132,7 +131,10 @@
 
   (defmacro and
 
-    "Like Clojure's `and` but an item consider truthy if it passes `clojure.test.check.results/pass?`."
+    "Like Clojure's `and` but an item consider truthy if it passes `clojure.test.check.results/pass?`.
+    
+     Great match for [[check]] as it allows for testing several assertions, even nested one, while keepin track
+     of where failure happens."
 
     [& form+]
 
@@ -144,7 +146,7 @@
 
 (defn ^:no-doc -check
 
-  ;;
+  ;; Used by [[check]], must be kept public.
 
   [beacon f]
 
@@ -162,7 +164,28 @@
 
 (defmacro check
 
-  ""
+  "Executes form.
+  
+   Any failure or exception is wrapped in an object that satifies `clojure.test.check.results/Result`.
+
+   The data attached is a map such as:
+
+   | Key | Value |
+   |---|---|
+   | `:mprop/path` | List of `beacon`s, contains more than one if checks were nested and shows exactly where failure happened |
+   | `:mprop/value` | Value returned by `form` |
+  
+   Usually, checks are used with [[and]]. A `beacon` can be any value the user deems useful.
+
+   For example (`and` being [[and]] from this namespace):
+
+   ```clojure
+   (and (check \"Some test\"
+               (= 4 (+ 2 2)))
+
+        (check \"Another test\"
+               (= 3 (inc 1))))
+   ```"
 
   [beacon form]
 
@@ -173,7 +196,9 @@
 
 (defn fail
 
-  ""
+  "Used by [[check]].
+  
+   More rarely, can be used to return an explicit failure."
 
   [beacon failure]
 
@@ -196,7 +221,19 @@
 
 (defmacro mult
 
-  ""
+  "Very common, sugar for using [[check]] with [[and]].
+
+   Short for \"multiplex\".
+  
+   Replicating example in [[check]]:
+  
+   ```clojure
+   (mult \"Some test\"
+         (= 4 (+ 2 2))
+   
+        \"Another test\"
+        (= 3 (inc 1)))
+   ```"
 
   [& check+]
 
