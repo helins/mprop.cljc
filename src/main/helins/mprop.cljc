@@ -15,7 +15,8 @@
             [clojure.test.check.results      :as TC.result])
   #?(:cljs (:require-macros [helins.mprop :refer [and
                                                   check
-                                                  deftest]])))
+                                                  deftest
+                                                  mult]])))
 
 
 (declare fail)
@@ -190,3 +191,18 @@
 
     (result-data [_]
       result))))
+
+
+
+(defmacro mult
+
+  ""
+
+  [& check+]
+
+  (assert (even? (count check+)))
+  `(helins.mprop/and ~@(map (fn [[beacon form]]
+                              `(check ~beacon
+                                      ~form))
+                            (partition 2
+                                       check+))))

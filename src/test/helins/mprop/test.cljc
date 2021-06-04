@@ -113,12 +113,15 @@
                                                               (mprop/check x
                                                                            (failure)))))]
                                                   ((f path))))]
-      (mprop/and (mprop/check "Path"
-                              (= path
-                                 path-2))
-                 (mprop/check "Value"
-                              (= value
-                                 value-2))))))
+      (mprop/mult
+
+        "Path"
+        (= path
+           path-2)
+
+        "Value"
+        (= value
+           value-2)))))
 
 
 
@@ -129,15 +132,15 @@
                                          8)
                     value (TC.gen/such-that boolean
                                             TC.gen/any)]
-    (mprop/and (mprop/check "Output is input"
-                            (= value
-                               (let [f (fn f [[x & x+]]
-                                         (if x+
-                                           (let [upstream (f x+)]
-                                             (fn []
-                                               (mprop/check x
-                                                            (upstream))))
-                                           (fn []
-                                             (mprop/check x
-                                                          value))))]
-                                 ((f path))))))))
+    (mprop/mult "Output is input"
+                (= value
+                   (let [f (fn f [[x & x+]]
+                             (if x+
+                               (let [upstream (f x+)]
+                                 (fn []
+                                   (mprop/check x
+                                                (upstream))))
+                               (fn []
+                                 (mprop/check x
+                                              value))))]
+                     ((f path)))))))
