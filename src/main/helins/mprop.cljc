@@ -9,8 +9,12 @@
 
   {:author "Adam Helinski"}
 
-  (:require [clojure.test.check.clojure-test :as TC.ct])
-  #?(:cljs (:require-macros [helins.mprop :refer [deftest]])))
+  (:refer-clojure :exclude [and])
+  (:require [clojure.core]
+            [clojure.test.check.clojure-test :as TC.ct]
+            [clojure.test.check.results      :as TC.result])
+  #?(:cljs (:require-macros [helins.mprop :refer [and
+                                                  deftest]])))
 
 
 ;;;;;;;;;; Defining tests
@@ -100,16 +104,33 @@
                        (update :max-size
                                #(or %
                                     (* max-size
-                                       (or (:ratio-num option+)
+                                       (or (:ratio-size option+)
                                            1))))
                        (update :num-tests
                                #(or %
                                     (* num-tests
-                                       (or (:ratio-size option+)
+                                       (or (:ratio-num option+)
                                            1)))))
                    ~prop))))
 
 
-;;;;;;;;;;
-  
-  
+;;;;;;;;;; Testing more than one assertion
+
+
+(let [-and (fn -and [[form & form-2+]]
+             (if form-2+
+               `(let [x# ~form]
+                  (if (TC.result/pass? x#)
+                    ~(-and form-2+)
+                    x#))
+               form))]
+
+  (defmacro and
+
+    "Like Clojure's `and` but an item consider truthy if it passes `clojure.test.check.results/pass?`."
+
+    [& form+]
+
+    (if (seq form+)
+      (-and form+)
+      true)))
