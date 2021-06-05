@@ -39,7 +39,7 @@
     </dependency>
   </dependencies>
   <build>
-    <sourceDirectory>src/main</sourceDirectory>
+    <sourceDirectory>.clj-kondo/export</sourceDirectory>
   </build>
   <repositories>
     <repository>

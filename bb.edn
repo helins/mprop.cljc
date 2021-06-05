@@ -1,4 +1,22 @@
-{:tasks {deploy
+{:tasks {cp
+
+         {:doc  "Print the classpath"
+          :task (do
+                  (println "Computing and printing classpath...\n")
+                  (doseq [line (sort (clojure.string/split (cp-string)
+                                                           (re-pattern ":")))]
+                    (println line)))}
+
+
+
+         cp:del
+
+         {:doc  "Delete cached classpath"
+          :task (fs/delete-tree ".cpcache")}
+
+
+
+         deploy
 
          {:depends [jar]
           :doc     "Deploy this project to Clojars"
@@ -39,7 +57,16 @@
 
          {:doc "Start Clj-kondo on './src' (further path can be provided as command-line argument)"
           :task (shell (str "clj-kondo --lint src/"
-                                               (first *command-line-args*)))}
+                            (first *command-line-args*)))}
+
+
+
+         lint:import
+
+         {:doc  "Initialize Clj-kondo and copy configuration files from dependencies"
+          :task (shell (format "clj-kondo --lint '%s' --dependencies --parallel --copy-configs"
+                               (cp-string)))}
+
 
 
          pom
@@ -76,10 +103,25 @@
 
 
 
+         :requires ([babashka.fs :as fs])
+
+
+
          :init
 
          (do
-           (require 'clojure.string)
+           (defn cp-string
+
+             ;; Returns the classpath as a string, reading profiles from CLI args.
+
+             []
+
+             (with-out-str (clojure (str "-Spath "
+                                         (when (some? *command-line-args*)
+                                           (str "-A"
+                                                (clojure.string/join ""
+                                                                     *command-line-args*)))))))
+
 
 
            (defn test-jvm

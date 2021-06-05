@@ -81,7 +81,7 @@
    | Key | Value |
    |---|---|
    | `:ratio-num` | Multiplies the base [[num-tests]] value |
-   | `:ratio-size` | Multiplies the base [[:max-size]] value |
+   | `:ratio-size` | Multiplies the base [[max-size]] value |
 
    For instance, a test that runs 10 times more with half the maximum size:
 

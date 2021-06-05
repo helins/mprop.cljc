@@ -7,7 +7,8 @@
 
   "CLJC playground during dev."
 
-  {:author "Adam Helinski"}
+  {:author           "Adam Helinski"
+   :clj-kondo/config '{:linters {:unused-namespace {:level :off}}}}
 
   (:require [clojure.test.check.generators :as TC.gen]
             [clojure.test.check.properties :as TC.prop]
@@ -19,7 +20,6 @@
 
 
 (comment
-
 
 
   )

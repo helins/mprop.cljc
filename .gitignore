@@ -36,3 +36,9 @@ package.json
 // Keeping private things
 
 private
+
+
+// Miscellaneous
+
+.clj-kondo/*
+!.clj-kondo/config.edn
