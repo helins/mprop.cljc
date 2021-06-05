@@ -4,12 +4,128 @@
 
 [![Cljdoc](https://cljdoc.org/badge/io.helins/mprop)](https://cljdoc.org/d/io.helins/mprop)
 
-Making dreams come true.
+![CircleCI](https://circleci.com/gh/helins/mprop.cljc.svg?style=shield)
 
+Lightweight and intuitive abstraction on top of [test.check](https://github.com/clojure/test.check) for an efficient generative testing environment.
+
+It offers a simple way for calibrating tests and writing multiple assertions at the level of one test while tracking exactly where a failure occurs.
 
 ## Usage
 
-Coming soon.
+```clojure
+(require '[helins.mprop :as mprop])
+```
+
+
+### Defining and calibrating tests
+
+Most of the time, it is not productive fixing an absolute number of tests and absolute maximum size on a test.
+During development, those values can be kept low in order to quickly gain a fast feedback on what is going on
+in the test suite while you are working. When actually testing, they can be set much higher, taking all the time
+they need to find those sweet edge cases.
+
+The following macro is just like `clojure.test.check.clojure-test/defspec` but accepts two additional key-values
+in the option map (if provided):
+
+| Key | Value |
+|---|---|
+| `:ratio-num` | Multiplies the base `num-tests` value |
+| `:ratio-size` | Multiplies the base `max-size` value |
+
+Those base values can be found in `helins.prop/max-size` and `helins.prop/num-tests`. Docstrings describes which environment variables
+can be set for modyfing those values at start.
+
+For instance, a test that runs 10 times more with half the maximum size:
+
+```clojure
+(deftest foo
+
+  {:ratio-num  10
+   :ratio-size 0.5}
+
+  some-property)
+```
+
+In practice, `:ratio-size` is less often modified while changing `:ratio-num` is very common. The key is to think in terms of proportion. It can
+be a good idea calibrating tests so that each takes roughly the same amount of time, or longer if a given test is deemed more important.
+
+
+### Multiplexing properties
+
+```clojure
+(require '[clojure.test.check.generators :as TC.gen]
+         '[clojure.test.check.properties :as TC.prop])
+```
+
+Suppose the following test, a classic of property-based testing:
+
+```clojure
+(mprop/deftest my-test
+
+  (TC.prop/for-all [x (TC.gen/vector TC.gen/large-integer)]
+    (let [sorted (sort x)]
+      (and (= (count x)
+              (count sorted))
+           (= sorted
+              (sort sorted))))))
+```
+
+It does the job but it is not effictive: if an assertion fails, you do not know which one. Imagine having a whole test suite with more complex cases.
+
+Now consider this first alternative:
+
+```clojure
+(mprop/deftest my-test
+
+  (TC.prop/for-all [x (TC.gen/vector TC.gen/large-integer)]
+    (let [sorted (sort x)]
+      (mprop/and (mprop/check "Both have the same size"
+                              (= (count x)
+                                 (count sorted)))
+                 (mprop/check "Sorting is idempotent"
+                              (= sorted
+                                 (sort sorted)))))))
+```
+
+The `mprop/check` macro creates a checkpoint which accepts any value acting as a beacon (here, a human-readable string is used) and a form to test.
+
+THe `mprop/and` macro, akin to regular `and`, stops as soon as a result returns false on `clojure.test.results/pass?`.
+
+In case of failure, `mprop/check` returns such a falsy result and contains the following data map:
+
+| Key | Value |
+|---|---|
+| `:mprop/path` | List of `beacon`s, contains more than one if checks were nested and shows exactly where the failure happened |
+| `:mprop/value` | Value returned by `form` |
+
+In other words, in case of failure, the whole test stops but at least you can locate exactly what failed. This pattern of combining `mprop/and` and `mprop/check`
+can be nested ad-libidum and is highly composable. It is so common that the `mprop/mult` macro is the sugar-coated version which would translate our
+example into:
+
+```clojure
+(mprop/deftest my-test
+
+  (TC.prop/for-all [x (TC.gen/vector TC.gen/large-integer)]
+    (let [sorted (sort x)]
+    (mprop/mult
+
+      "Both have the same size"
+      (= (count x)
+         (count sorted)))
+
+      "Sorting is idempotent"
+      (= sorted
+         (sort sorted)))))
+```
+
+
+### Debugging multiplexed properties
+
+This monadic way of multiplexing works really well most of the time. We have used it extensively, sometimes testing dozens of assertions under one `deftest`.
+
+The so-called "beacons" which indicates where an error occured should mostlikely be human-readable strings since test errors are consumed mostly by humans.
+However, they can be anything. In case of failure, they can hold contextual data which can help you understand why something is failing, maybe even produce
+some useful side-effect.
 
 
 ## Development and testing <a name="develop">
