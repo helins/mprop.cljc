@@ -5,7 +5,7 @@
 
 (ns helins.mprop.example
 
-  "Testing the same assertions differently.
+  "Test samples.
 
    They are failing on purpose so that the user can run them and compare the outputs."
 
