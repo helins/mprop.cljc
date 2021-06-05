@@ -16,6 +16,8 @@ It offers a simple way for calibrating tests and writing multiple assertions at 
 (require '[helins.mprop :as mprop])
 ```
 
+The following excerpts can be found and explored in the [helins.mprop.example](../main/src/example/helins/mprop/example.cljc).
+
 
 ### Defining and calibrating tests
 
@@ -60,7 +62,7 @@ be a good idea calibrating tests so that each takes roughly the same amount of t
 Suppose the following test, a classic of property-based testing:
 
 ```clojure
-(mprop/deftest my-test
+(mprop/deftest bad-test
 
   (TC.prop/for-all [x (TC.gen/vector TC.gen/large-integer)]
     (let [sorted (sort x)]
@@ -75,7 +77,7 @@ It does the job but it is not effictive: if an assertion fails, you do not know 
 Now consider this first alternative:
 
 ```clojure
-(mprop/deftest my-test
+(mprop/deftest better-test
 
   (TC.prop/for-all [x (TC.gen/vector TC.gen/large-integer)]
     (let [sorted (sort x)]
@@ -103,19 +105,63 @@ can be nested ad-libidum and is highly composable. It is so common that the `mpr
 example into:
 
 ```clojure
-(mprop/deftest my-test
+(mprop/deftest awesome-test
 
   (TC.prop/for-all [x (TC.gen/vector TC.gen/large-integer)]
     (let [sorted (sort x)]
+      (mprop/mult
+
+        "Both have the same size"
+        (= (count x)
+           (count sorted)))
+
+        "Sorting is idempotent"
+        (= sorted
+           (sort sorted)))))
+```
+
+
+### Nesting properties
+
+Property multiplexing can become somewhat complex and nesting offers good reusability while helping in locating the error.
+
+Supposing this failing test (since 4 is not lesser than 0):
+
+```clojure
+(mprop/deftest nested
+
+  (TC.prop/for-all [_ (TC.gen/return nil)]
     (mprop/mult
 
-      "Both have the same size"
-      (= (count x)
-         (count sorted)))
+      "Yes"
+      true
 
-      "Sorting is idempotent"
-      (= sorted
-         (sort sorted)))))
+      "42"
+      42
+
+      "Prepare something and continue"
+      (let [foo (+ 2
+                   2)]
+        (mprop/mult
+
+          "Is 4"
+          (= 4
+             foo)
+
+          "Below 0"
+          (< foo
+             0)
+
+          "All right"
+          true)))))
+```
+
+The data attached under `:result-data` is:
+
+```clojure
+{:mprop/path  (list "Prepare something and continue"
+                    "Below 0")
+ :mprop/value false}
 ```
 
 
