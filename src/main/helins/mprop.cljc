@@ -40,7 +40,7 @@
   
   (def max-size
   
-    "Maximum size used by [[deftest]]. Can be set using the \"MPROP_MAX_SIZE\" env variable.
+    "Maximum size used by [[deftest]]. Can be set using the `MPROP_MAX_SIZE` env variable.
     
      Default value is 200."
   
@@ -51,7 +51,7 @@
   
   (def num-tests
   
-    "Number of tests used by [[deftest]]. Can be set using the \"MPROP_NUM_TESTS\" env variable.
+    "Number of tests used by [[deftest]]. Can be set using the `MPROP_NUM_TESTS` env variable.
     
      Default value is 100."
   
@@ -131,7 +131,7 @@
 
   (defmacro and
 
-    "Like Clojure's `and` but an item consider truthy if it passes `clojure.test.check.results/pass?`.
+    "Like Clojure's `and` but an item is considered truthy if it passes `clojure.test.check.results/pass?`.
     
      Great match for [[check]] as it allows for testing several assertions, even nested one, while keepin track
      of where failure happens."
@@ -167,16 +167,15 @@
 
   "Executes form.
   
-   Any failure or exception is wrapped in an object that satifies `clojure.test.check.results/Result`.
-
-   The data attached is a map such as:
+   Any failure or thrown exception is wrapped in an object that returns false on `clojure.test.check.results/pass?` with
+   the following result data map attached:
 
    | Key | Value |
    |---|---|
    | `:mprop/path` | List of `beacon`s, contains more than one if checks were nested and shows exactly where failure happened |
    | `:mprop/value` | Value returned by `form` |
   
-   Usually, checks are used with [[and]]. A `beacon` can be any value the user deems useful.
+   Usually, checks are used with [[and]]. A `beacon` can be any value the user deems useful (often a human-readable string).
 
    For example (`and` being [[and]] from this namespace):
 
@@ -229,10 +228,10 @@
    Replicating example in [[check]]:
   
    ```clojure
-   (mult \"Some test\"
+   (mult \"Some assertion\"
          (= 4 (+ 2 2))
    
-        \"Another test\"
+        \"Another assertion\"
         (= 3 (inc 1)))
    ```"
 

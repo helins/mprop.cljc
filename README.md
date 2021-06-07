@@ -156,7 +156,7 @@ Supposing this failing test (since 4 is not lesser than 0):
           true)))))
 ```
 
-The data attached under `:result-data` is:
+The result data attached under `:result-data` will be:
 
 ```clojure
 {:mprop/path  (list "Prepare something and continue"
@@ -177,7 +177,7 @@ some useful side-effect.
 ## Development and testing <a name="develop">
 
 This repository is organized with [Babashka](https://github.com/babashka/babashka), a wonderful tool for any Clojurist
-that comes a powerful task runner.
+that comes with a powerful task runner.
 
 Listing all tasks:
 

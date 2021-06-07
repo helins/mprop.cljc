@@ -137,7 +137,6 @@
                                                                      *command-line-args*)))))))
 
 
-
            (defn shadow-clean
              
              ;; Deletes a Shadow-CLJS profile.
@@ -149,7 +148,6 @@
                (System/exit 42))
              (fs/delete-tree (str ".shadow-cljs/builds/"
                                   profile)))
-
 
 
            (defn test-env

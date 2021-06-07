@@ -16,13 +16,17 @@ All notable changes to this project will be documented in this file.
 
 
 
-## 0.0.0-alpha0 - 2021-xx-xx
+## 0.0.0 - 2021-06-05
 
 ### Added
 
-- Something
+- API with:
+    - `and`
+    - `check`
+    - `deftest`
+    - `mult`
 
 
 
-[Unreleased]:  https://github.com/io.helins/mprop/compare/0.0.0-alpha0...HEAD
-[0.0.0-alpha0]: https://github.com/io.helins/mprop/releases/tag/0.0.0-alpha0
+[Unreleased]:  https://github.com/io.helins/mprop/compare/0.0.0...HEAD
+[0.0.0]: https://github.com/io.helins/mprop/releases/tag/0.0.0

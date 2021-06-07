@@ -3,10 +3,10 @@
   <modelVersion>4.0.0</modelVersion>
   <groupId>io.helins</groupId>
   <artifactId>mprop</artifactId>
-  <version>0.0.0-alpha0</version>
+  <version>0.0.1</version>
   <name>mprop</name>
   <description>Multiplexing `test.check` properties for thorough generative testing</description>
-  <url>https://github.com/io.helins/mprop.cljc</url>
+  <url>https://github.com/helins/mprop.cljc</url>
   <licenses>
     <license>
       <name>Mozilla Public License Version 2.0</name>
@@ -16,14 +16,14 @@
   <developers>
     <developer>
       <name>Adam Helinski</name>
-      <email>adam#helins.io</email>
+      <email>adam@helins.io</email>
       <url>http://www.helins.io</url>
     </developer>
   </developers>
   <scm>
-    <url>https://github.com/io.helins/mprop.cljc</url>
-    <connection>scm:git:git://github.com/io.helins/mprop.cljc.git</connection>
-    <developerConnection>scm:git:ssh://git@github.com/io.helins/mprop.cljc.git</developerConnection>
+    <url>https://github.com/helins/mprop.cljc</url>
+    <connection>scm:git:git://github.com/helins/mprop.cljc.git</connection>
+    <developerConnection>scm:git:ssh://git@github.com/helins/mprop.cljc.git</developerConnection>
     <tag>HEAD</tag>
   </scm>
   <dependencies>
