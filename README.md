@@ -174,6 +174,12 @@ However, they can be anything. In case of failure, they can hold contextual data
 some useful side-effect.
 
 
+## Notes
+
+The [core BinF test namespace](https://github.com/helins/binf.cljc/blob/main/src/test/helins/binf/test.cljc) provides a real world example where `deftest` and
+`mult` are used extensively.
+
+
 ## Development and testing <a name="develop">
 
 This repository is organized with [Babashka](https://github.com/babashka/babashka), a wonderful tool for any Clojurist

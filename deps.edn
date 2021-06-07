@@ -12,18 +12,17 @@
   :dev
   {:extra-paths ["src/dev"
                  "src/example"]}
+  :install
+  {:exec-args  {:artifact  "compiled/jvm/release.jar"
+                :installer :local}
+   :exec-fn    deps-deploy.deps-deploy/deploy
+   :extra-deps {slipset/deps-deploy {:mvn/version "0.1.5"}}}
 
   :jar
   {:exec-args    {:jar      "compiled/jvm/release.jar"
                   :sync-pom true}
    :exec-fn      hf.depstar/jar
    :replace-deps {seancorfield/depstar {:mvn/version "2.0.171"}}}
-
-  :install
-  {:exec-args  {:artifact  "compiled/jvm/release.jar"
-                :installer :local}
-   :exec-fn    deps-deploy.deps-deploy/deploy
-   :extra-deps {slipset/deps-deploy {:mvn/version "0.1.5"}}}
 
   :kaocha
   {:extra-deps {lambdaisland/kaocha {:mvn/version "1.0.829"}}}
@@ -35,9 +34,11 @@
   :test
   {:extra-paths ["src/test"]}}
 
+
  :deps
  {org.clojure/test.check {:mvn/version "1.1.0"}}
 
+ 
  :paths
  [".clj-kondo/export"
   "src/main"]}
