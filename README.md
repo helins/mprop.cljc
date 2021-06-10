@@ -85,9 +85,8 @@ Suppose the following test, a classic of property-based testing:
  :smallest [[]]}
 ```
 
-It does the job but it is not effictive: if an assertion fails, you do not know which one. Neither `:result` nor `:result-data` enlighten us and
+It does the job but it is not effective: if an assertion fails, you do not know which one. Neither `:result` nor `:result-data` enlighten us and
 we are left blind.
-
 
 Now consider this first alternative:
 
