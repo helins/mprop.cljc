@@ -68,11 +68,26 @@ Suppose the following test, a classic of property-based testing:
     (let [sorted (sort x)]
       (and (= (count x)
               (count sorted))
-           (= sorted
-              (sort sorted))))))
+           (not= sorted
+                 (sort sorted))))))  ;; Fails, sorting a sorted collection should be idempotent
+
+
+;; Simplified output after running (bad-test)
+
+{:total-nodes-visited 0,
+ :depth 0,
+ ;; Fails...
+ :pass? false,
+ :result false,      
+ ;; But why?!
+ :result-data nil
+ :time-shrinking-ms 0,
+ :smallest [[]]}
 ```
 
-It does the job but it is not effictive: if an assertion fails, you do not know which one. Imagine having a whole test suite with more complex cases.
+It does the job but it is not effictive: if an assertion fails, you do not know which one. Neither `:result` nor `:result-data` enlighten us and
+we are left blind.
+
 
 Now consider this first alternative:
 
@@ -85,8 +100,21 @@ Now consider this first alternative:
                               (= (count x)
                                  (count sorted)))
                  (mprop/check "Sorting is idempotent"
-                              (= sorted
-                                 (sort sorted)))))))
+                              (not= sorted
+                                    (sort sorted)))))))
+
+
+;; Simplified output after running (better-test)
+
+{:total-nodes-visited 0,
+ :depth 0,
+ ;; Fails...
+ :pass? false,
+ :result false,
+ ;; Oh yeah, that's why!
+ :result-data #:mprop{:path ("Sorting is idempotent"), :value false},
+ :time-shrinking-ms 0,
+ :smallest [[]]}
 ```
 
 The `mprop/check` macro creates a checkpoint which accepts any value acting as a beacon (here, a human-readable string is used) and a form to test.
@@ -116,8 +144,8 @@ example into:
            (count sorted)))
 
         "Sorting is idempotent"
-        (= sorted
-           (sort sorted)))))
+        (not= sorted
+              (sort sorted)))))
 ```
 
 
@@ -154,6 +182,20 @@ Supposing this failing test (since 4 is not lesser than 0):
 
           "All right"
           true)))))
+
+
+;; Simplified output after running (nested)
+
+{:total-nodes-visited 0,
+ :depth 0,
+ :pass? false,
+ :result false,
+ ;; Okay, that's what's going on
+ :result-data #:mprop{:path ("Prepare something and continue"
+                             "Below 0"),
+                      :value false},
+ :time-shrinking-ms 0,
+ :smallest [nil]}
 ```
 
 The result data attached under `:result-data` will be:
